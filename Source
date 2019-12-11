@@ -1,0 +1,151 @@
+import javax.swing.*;
+import javax.swing.event.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.Scanner;
+
+public class GCDAPP {
+
+    private JFrame frame;
+    private boolean tracking;       
+    private int xstart;             
+    private int ystart;             
+    private int xend;               
+    private int yend;
+    private int w;
+    private int h;               
+    private  int borderWidth = 5; 
+    private Scanner scnr  =  new Scanner(System.in);  
+
+    public static void main (String [] arg) {
+        GCDAPP first = new GCDAPP();
+    }//main
+
+    public GCDAPP() {
+        tracking = false;
+        frame = new JFrame();
+        frame.setBounds(250,98,600,480);
+        frame.setTitle("Window number three");
+        Container cp = frame.getContentPane();
+        JPanel top = new JPanel();
+        cp.add(top,BorderLayout.NORTH);
+        MyPanel pane = new MyPanel();
+        cp.add(pane,BorderLayout.CENTER);
+        pane.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                xstart = e.getX();
+                ystart = e.getY();
+           
+                
+            }
+            public void mouseReleased(MouseEvent e) {
+                xend = e.getX();
+                yend = e.getY();
+                if (xend < xstart) { int tmp = xstart; xstart = xend; xend = tmp; }
+                if (yend < ystart) { int tmp = ystart; ystart = yend; yend = tmp; }
+                frame.repaint();
+            }
+        });
+        pane.addMouseMotionListener(new MouseMotionAdapter() {
+            public void mouseMoved(MouseEvent e) {
+                if (tracking) {
+                    int x = e.getX();
+                    int y = e.getY();
+                }
+            }
+        });
+        frame.setVisible(true);
+    }//constructor
+
+    public void trackMouse() {  
+        tracking = !tracking;
+    }//trackMouse
+
+public class MyPanel extends JPanel {   
+
+    public void paintComponent(Graphics g) {
+        int width  = this.getWidth();
+        int height = this.getHeight();
+        g.setColor(Color.BLACK);
+        for (int delta = 0; delta < borderWidth; delta++) {
+            g.drawRect(delta,delta,width-(2*delta),height-(2*delta));
+        }
+        if (xstart != xend || ystart != yend) {
+            changeColor(g);
+            System.out.println("Enter width: ");
+            w = scnr.nextInt();
+            System.out.println("Enter Height: ");
+            h = scnr.nextInt();
+            //int hack = LCD(w,h);
+            g.drawRect(xstart,ystart,w,h);
+            
+            drawSquares(g, xstart, ystart, w,h, 0);
+            
+                        System.out.println("Dimensions: " + GCD(w,h) + " x " + GCD(w,h));
+            System.out.println("Area of rectangle: " + w*h);
+            System.out.println("Area of Squares: " + GCD(w,h)*GCD(w,h));  
+            System.out.println("Number of maximized squares: " + (w*h)/(GCD(w,h)*GCD(w,h)));
+           
+        }
+    }
+    
+    public int GCD(int a, int b) {
+      if (b==0) return a;
+      return GCD(b,a%b);
+    }
+    public int LCD(int a, int b) {
+      for (int i = 2; i < a/2 && i < b/2; i++) {
+         if (a % i == 0 && b % i == 0) {
+            return i;
+         }
+      }
+      return 1;
+    }
+    public void changeColor(Graphics g) {
+   
+         int red     = (int)(256*Math.random());
+         int green   = (int)(256*Math.random());
+         int blue    = (int)(256*Math.random());
+         g.setColor(new Color(red, green, blue));
+    }
+    int[] colors = new int[] {
+      0xFF0000,
+      0x00FF00,
+      0x0000FF,
+      0xFFFF00,
+      0xFF00FF,
+      0x00FFFF,
+    };
+    public void drawSquares(Graphics g, int xstart, int ystart, int w, int h, int level)  {
+      
+      int side = GCD(w,h);
+      if (w == h) {
+         //square
+         int div = LCD(w,h);
+         if (div < 2) { return; }
+         side = GCD(w/div, h);
+      } else {
+         // rectangle
+      }
+      
+      for (int i = ystart; i < ystart + h; i += side){
+         //g.drawRect(xstart,i,side,side);              
+         for (int j = xstart; j < xstart + w; j += side){
+            int div = LCD(w,h);
+         
+            if (side > 1 && div >= 2) {
+               drawSquares(g, j, i, side, side, level+1);
+            }
+            g.setColor(new Color(colors[level % colors.length]));
+            g.drawRect(j,i,side-1,side-1);
+            
+         }
+      }
+      
+      
+      g.drawRect(xstart,ystart,w,h);
+
+    }
+    
+}
+}
